@@ -8,17 +8,13 @@ const pool = new Pool({
 });
 
 
-pool 
-  .query(pool.query(`SELECT title FROM properties LIMIT 10;`).then(response => {console.log(response)})
-  )
-  .then((res) => {
-    console.log(res);
+pool.query(`SELECT title FROM properties LIMIT 10;`)
+  .then(response => {
+    console.log(response);
   })
-  .catch((err) => {
-    console.log(err.message);
+  .catch(error => {
+    console.error(error);
   });
-
-
 
 
 const properties = require("./json/properties.json");
@@ -33,14 +29,28 @@ const users = require("./json/users.json");
  * @return {Promise<{}>} A promise to the user.
  */
 const getUserWithEmail = function (email) {
-  let resolvedUser = null;
-  for (const userId in users) {
-    const user = users[userId];
-    if (user && user.email.toLowerCase() === email.toLowerCase()) {
-      resolvedUser = user;
-    }
-  }
-  return Promise.resolve(resolvedUser);
+
+  const queryStr = `
+   SELECT *
+   FROM users
+   WHERE email = $1
+  `
+
+  const queryParams = [email];
+  
+  return pool.query(queryStr, queryParams)
+    .then((results) => {
+      if (results.rows.length === 0) {
+      return null;
+      }
+      else {
+        return results.rows[0]
+      }
+    })
+    .catch((err) => {
+      console.log(err)
+    })
+
 };
 
 /**
@@ -49,7 +59,28 @@ const getUserWithEmail = function (email) {
  * @return {Promise<{}>} A promise to the user.
  */
 const getUserWithId = function (id) {
-  return Promise.resolve(users[id]);
+  
+  const queryStr = `
+   SELECT *
+   FROM users
+   WHERE id = $1
+  `
+
+  const queryParams = [id];
+  
+  return pool.query(queryStr, queryParams)
+    .then((results) => {
+      if (results.rows.length === 0) {
+      return null;
+      }
+      else {
+        return results.rows[0]
+      }
+    })
+    .catch((err) => {
+      console.log(err)
+    })
+
 };
 
 /**
@@ -58,10 +89,23 @@ const getUserWithId = function (id) {
  * @return {Promise<{}>} A promise to the user.
  */
 const addUser = function (user) {
-  const userId = Object.keys(users).length + 1;
-  user.id = userId;
-  users[userId] = user;
-  return Promise.resolve(user);
+
+const queryStr = 
+`INSERT INTO users (name, email, password)
+VALUES ($1, $2, $3)
+RETURNING *;
+`
+
+const queryParams = [user.name, user.email, user.password];
+
+return pool.query(queryStr, queryParams)
+.then((results) => {
+  return results.row[0]
+})
+.catch((err) => {
+  console.log("error: ", err)
+});
+
 };
 
 /// Reservations
