@@ -29,13 +29,11 @@ const users = require("./json/users.json");
  * @return {Promise<{}>} A promise to the user.
  */
 const getUserWithEmail = function (email) {
-
   const queryStr = `
    SELECT *
    FROM users
    WHERE email = $1
   `
-
   const queryParams = [email];
   
   return pool.query(queryStr, queryParams)
@@ -50,7 +48,6 @@ const getUserWithEmail = function (email) {
     .catch((err) => {
       console.log(err)
     })
-
 };
 
 /**
@@ -59,13 +56,11 @@ const getUserWithEmail = function (email) {
  * @return {Promise<{}>} A promise to the user.
  */
 const getUserWithId = function (id) {
-  
   const queryStr = `
-   SELECT *
-   FROM users
-   WHERE id = $1
+    SELECT *
+    FROM users
+    WHERE id = $1
   `
-
   const queryParams = [id];
   
   return pool.query(queryStr, queryParams)
@@ -80,7 +75,6 @@ const getUserWithId = function (id) {
     .catch((err) => {
       console.log(err)
     })
-
 };
 
 /**
@@ -100,7 +94,7 @@ const queryParams = [user.name, user.email, user.password];
 
 return pool.query(queryStr, queryParams)
 .then((results) => {
-  return results.row[0]
+  return results.rows[0]
 })
 .catch((err) => {
   console.log("error: ", err)
@@ -116,7 +110,25 @@ return pool.query(queryStr, queryParams)
  * @return {Promise<[{}]>} A promise to the reservations.
  */
 const getAllReservations = function (guest_id, limit = 10) {
-  return getAllProperties(null, 2);
+
+  const queryStr = 
+  `SELECT reservations.id, properties.title, properties.cost_per_night, reservations.start_date, avg(rating) as average_rating
+  FROM reservations
+  JOIN properties ON reservations.property_id = properties.id
+  JOIN property_reviews ON properties.id = property_reviews.property_id
+  WHERE reservations.guest_id = $1
+  GROUP BY properties.id, reservations.id
+  ORDER BY reservations.start_date;
+  `
+  const queryParams = [guest_id]
+
+  return pool.query(queryStr, queryParams)
+  .then((results) => {
+    return results.rows;
+  })
+  .catch((err) => {
+    console.log("error: ", err)
+  })
 };
 
 /// Properties
