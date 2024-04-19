@@ -7,7 +7,7 @@ const pool = new Pool({
   database: "lightbnb"
 });
 
-
+//fetch properties
 pool.query(`SELECT title FROM properties LIMIT 10;`)
   .then(response => {
     console.log(response);
@@ -16,18 +16,14 @@ pool.query(`SELECT title FROM properties LIMIT 10;`)
     console.error(error);
   });
 
-
+//import JSON data
 const properties = require("./json/properties.json");
 const users = require("./json/users.json");
 
 
 /// Users
 
-/**
- * Get a single user from the database given their email.
- * @param {String} email The email of the user.
- * @return {Promise<{}>} A promise to the user.
- */
+//get user by email
 const getUserWithEmail = function (email) {
   const queryStr = `
    SELECT *
@@ -50,11 +46,7 @@ const getUserWithEmail = function (email) {
     })
 };
 
-/**
- * Get a single user from the database given their id.
- * @param {string} id The id of the user.
- * @return {Promise<{}>} A promise to the user.
- */
+//get user by id
 const getUserWithId = function (id) {
   const queryStr = `
     SELECT *
@@ -77,11 +69,7 @@ const getUserWithId = function (id) {
     })
 };
 
-/**
- * Add a new user to the database.
- * @param {{name: string, password: string, email: string}} user
- * @return {Promise<{}>} A promise to the user.
- */
+// add a new user
 const addUser = function (user) {
 
 const queryStr = 
@@ -104,11 +92,7 @@ return pool.query(queryStr, queryParams)
 
 /// Reservations
 
-/**
- * Get all reservations for a single user.
- * @param {string} guest_id The id of the user.
- * @return {Promise<[{}]>} A promise to the reservations.
- */
+// get all users for a user 
 const getAllReservations = function (guest_id, limit = 10) {
 
   const queryStr = 
@@ -134,12 +118,7 @@ const getAllReservations = function (guest_id, limit = 10) {
 
 /// Properties
 
-/**
- * Get all properties.
- * @param {{}} options An object containing query options.
- * @param {*} limit The number of results to return.
- * @return {Promise<[{}]>}  A promise to the properties.
- */
+//get all properties
 const getAllProperties = function (options, limit = 10) {
   const queryParams = [];
   let queryString = `
@@ -191,11 +170,7 @@ const getAllProperties = function (options, limit = 10) {
 
 
 
-/**
- * Add a property to the database
- * @param {{}} property An object containing all of the property details.
- * @return {Promise<{}>} A promise to the property.
- */
+//insert a new property into database
 const addProperty = function (property) {
   const queryStr = `
   INSERT INTO properties (owner_id, title, description, thumbnail_photo_url, cover_photo_url, 
@@ -222,12 +197,12 @@ const addProperty = function (property) {
   ];
   
   return pool.query(queryStr, queryParams)
-.then((results) => {
-  return results.rows[0]
-})
-.catch((err) => {
-  console.log("error: ", err)
-});
+  .then((results) => {
+    return results.rows[0]
+  })
+  .catch((err) => {
+    console.log("error: ", err)
+  });
 };
 
 module.exports = {
