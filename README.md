@@ -16,4 +16,7 @@
 - search your listings
 - search your reservations
 
+## Special Thanks
+
+Thank you to Lighthouse Labs for the learning Opportunity
 
